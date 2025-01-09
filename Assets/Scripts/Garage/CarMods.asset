@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c383524d3b9c4f32a5f559773682a40b, type: 3}
+  m_Name: CarMods
+  m_EditorClassIdentifier: 
+  carMods:
+  - {fileID: 5426205577285185027, guid: 167f00d1acc658445b275a79a99070e2, type: 3}
+  - {fileID: -1087429523493753544, guid: d393c9d820978f4449c4a48f4752cb34, type: 3}
+  - {fileID: 8796060061666028161, guid: 389b4c68b594da24aa56241def7b886c, type: 3}
+  - {fileID: 9206312736326829123, guid: ad6e73cbc7c0ef740bd891a14263c770, type: 3}
+  - {fileID: 5963500157587474798, guid: 5a5ad82f08686704ba90e6172c23cfd6, type: 3}
+  - {fileID: 2089042267680059949, guid: 6bbdd79c873134748bbd8611003cae7c, type: 3}
+  carPrefabs:
+  - {fileID: 1473659711335082588, guid: d089e8e852bde2047b2f139241522239, type: 3}
+  - {fileID: 4537033990015748453, guid: a2a7a054a1506034db545726d7bb38b0, type: 3}
+  - {fileID: 1765006492470461736, guid: aec87a88e9ee6f54287507fd62206cb6, type: 3}

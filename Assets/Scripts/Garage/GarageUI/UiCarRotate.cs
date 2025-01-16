@@ -17,6 +17,11 @@ namespace Garage.GarageUI
 
         void Update()
         {
+            OnInput();
+        }
+
+        private void OnInput()
+        {
             if (Input.GetMouseButtonDown(0))
             {
                 Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);

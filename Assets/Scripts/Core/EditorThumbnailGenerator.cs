@@ -3,17 +3,20 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public static class EditorThumbnailGenerator
+namespace Core
 {
-    public static void SaveThumbnail(Texture2D thumbnail, string path)
+    public static class EditorThumbnailGenerator
     {
-        byte[] bytes = thumbnail.EncodeToPNG();
-        File.WriteAllBytes(path, bytes);
-        Debug.Log("Thumbnail saved to: " + path);
-    }
-    public static Texture2D GetThumbnail(GameObject prefab)
-    {
-        return AssetPreview.GetAssetPreview(prefab);
+        public static void SaveThumbnail(Texture2D thumbnail, string path)
+        {
+            byte[] bytes = thumbnail.EncodeToPNG();
+            File.WriteAllBytes(path, bytes);
+            Debug.Log("Thumbnail saved to: " + path);
+        }
+        public static Texture2D GetThumbnail(GameObject prefab)
+        {
+            return AssetPreview.GetAssetPreview(prefab);
+        }
     }
 }
 #endif

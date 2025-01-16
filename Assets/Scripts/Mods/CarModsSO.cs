@@ -1,22 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
 using UnityEngine;
 
 namespace Mods
 {
     [CreateAssetMenu(fileName = "CarMods", menuName = "Mods", order = 0)]
-    public class CarModsSO : ScriptableObject
+    public class CarModsSo : ScriptableObject
     {
         [SerializeField] private List<CarMod> carMods;
         [SerializeField]private List<WheelData> carPrefabs;
 
         public List<WheelData> CarPrefabs => carPrefabs;
-
-        public string GetIdByMod(ICarMod mod)
-        {
-            return mod.Id;
-            
-        }
         public ICarMod GetModById(string id)
         {
            return carMods.FirstOrDefault(element => ((ICarMod)element).Id == id);

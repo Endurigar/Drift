@@ -12,7 +12,7 @@ namespace Garage.GarageUI
         [SerializeField] private Button decalButton;
         [SerializeField] private Transform buttonsParent;
         [SerializeField] private Transform decalParent;
-        [SerializeField] private CarModsSO carModsSo;
+        [SerializeField] private CarModsSo carModsSo;
 
         public event Action<string> OnWheelSelected; 
         public event Action<string> OnDecalSelected; 

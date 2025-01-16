@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Core;
 using Fusion;
 using Fusion.Sockets;
 using Multiplayer;
@@ -12,7 +13,7 @@ namespace Mods
     public class Car : NetworkBehaviour
     {
         [SerializeField] private Transform cameraTransform;
-        [SerializeField] private CarModsSO carModsSO;
+        [SerializeField] private CarModsSo carModsSO;
         private CarData data;
         private WheelData currentCarInstance;
         public CarData Data => data;
@@ -20,30 +21,29 @@ namespace Mods
         public WheelData CurrentCarInstance => currentCarInstance;
         private void LoadData()
         {
-            var path = Path.Combine(Application.persistentDataPath,$"{CurrentCarInstance.name}.json");
-            if (File.Exists(path))
-            { 
-                var json = File.ReadAllText(path);
+            var keyName = currentCarInstance.name;
+            if (PlayerPrefs.HasKey(keyName))
+            {
+                var json = PlayerPrefs.GetString(keyName);
                 data = JsonConvert.DeserializeObject<CarData>(json);
             }
             else
             {
-                data = new();
+                data = new CarData();
             }
         }
 
         private CarData GetData(int index)
         {
-            var name = carModsSO.CarPrefabs[index].name;
-            var path = Path.Combine(Application.persistentDataPath,$"{name}(Clone).json");
-            if (File.Exists(path))
-            { 
-                var json = File.ReadAllText(path);
+            var name = carModsSO.CarPrefabs[index].name+"(Clone)";
+            if (PlayerPrefs.HasKey(name))
+            {
+                var json = PlayerPrefs.GetString(name);
                 return JsonConvert.DeserializeObject<CarData>(json);
             }
             else
             {
-                return  new();
+                return new CarData();
             }
         }
    
@@ -85,11 +85,19 @@ namespace Mods
         {
             var spawner = FindObjectOfType<BasicSpawner>();
             spawner.OnDataReceived += ReceivedData;
-            var transf = Spawner.Instance.SpawnPoints[Object.InputAuthority.PlayerId - 1];
-            transform.position = transf.transform.position;
-            transform.rotation = transf.transform.rotation;
-            base.Spawned();
-     
+            if (Runner.GameMode == GameMode.Single)
+            {
+                var transSingle = Spawner.Instance.SpawnPoints[0];
+                transform.position = transSingle.transform.position;
+                transform.rotation = transSingle.transform.rotation;
+            }
+            else
+            {
+                var transf = Spawner.Instance.SpawnPoints[Object.InputAuthority.PlayerId - 1];
+                transform.position = transf.transform.position;
+                transform.rotation = transf.transform.rotation;
+            }
+            base.Spawned();    
         }
         public void SpawnSavedCar()
         {
@@ -106,7 +114,7 @@ namespace Mods
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             var json = JsonConvert.SerializeObject(Data,settings);
-            File.WriteAllText(path,json);
+            PlayerPrefs.SetString(CurrentCarInstance.name, json);
         }
 
         public void ChangeCar(int index, bool loadMods = true)

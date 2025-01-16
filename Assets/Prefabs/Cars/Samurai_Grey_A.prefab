@@ -303,13 +303,13 @@ MonoBehaviour:
   - WheelMesh: {fileID: 1375928499914264263}
     WheelCollider: {fileID: 643436772051291040}
     isForwardWheels: 1
-  - WheelMesh: {fileID: 6476537607132614479}
+  - WheelMesh: {fileID: 2553746906446446948}
     WheelCollider: {fileID: 3826889084247440188}
     isForwardWheels: 1
-  - WheelMesh: {fileID: 4798628155692892704}
+  - WheelMesh: {fileID: 6476537607132614479}
     WheelCollider: {fileID: 1127428634519443339}
     isForwardWheels: 0
-  - WheelMesh: {fileID: 2553746906446446948}
+  - WheelMesh: {fileID: 4798628155692892704}
     WheelCollider: {fileID: 6721235449119894616}
     isForwardWheels: 0
   decalHandler: {fileID: 2739659223679911896}

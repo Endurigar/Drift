@@ -1,5 +1,7 @@
+using Garage.GarageUI;
 using Mods;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Garage
@@ -11,7 +13,7 @@ namespace Garage
         [SerializeField] private GameObject buttonsHandler;
         [SerializeField] private Button setNewColor;
         [SerializeField] private Button closeButton;
-        [SerializeField] private GaragaeUiHandler garagaeUiHandler;
+        [FormerlySerializedAs("garagaeUiHandler")] [SerializeField] private GarageUiHandler garageUiHandler;
         [SerializeField] private CarSwapper carSwapper;
 
         private ColorPickerTriangle colorPickerTriangle;
@@ -46,7 +48,7 @@ namespace Garage
 
         private void SetPaintMode(bool enable)
         {
-            garagaeUiHandler.ChooseTargetPanel(buttonsHandler);
+            garageUiHandler.ChooseTargetPanel(buttonsHandler);
         }
 
         private void SetNewColor()

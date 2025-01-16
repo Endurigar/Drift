@@ -13,8 +13,6 @@ namespace Ui
         [SerializeField] private TMP_Text playerTwoText;
         [SerializeField] private TMP_Text waitingForHost;
         [SerializeField] private BasicSpawner basicSpawner;
-        [SerializeField] private Button backButton;
-        [SerializeField] private GameObject lobby;
         [SerializeField] private SceneRef sceneRef;
         [SerializeField] private Button back;
         [SerializeField] private GameObject lobbyListPage;
@@ -24,7 +22,6 @@ namespace Ui
         {
             back.onClick.AddListener(OnBack);
             networkRunner = basicSpawner.GetComponent<NetworkRunner>();
-            backButton.onClick.AddListener(OnBackButton);
             startGame.onClick.AddListener(OnStart);
             basicSpawner.OnPlayerJoinedEvent += PlayerJoined;
         }
@@ -37,10 +34,6 @@ namespace Ui
 
         private void PlayerJoined()
         {
-            if (!networkRunner.IsClient)
-            {
-                startGame.gameObject.SetActive(true);
-            }
             if (networkRunner.IsClient)
             {
                 playerTwoText.text = "PLAYER 2";
@@ -48,18 +41,17 @@ namespace Ui
             }
             if (networkRunner.ActivePlayers.Count() >= 2)
             {
-                playerTwoText.text = "PLAYER 2";   
+                playerTwoText.text = "PLAYER 2";
+                if (networkRunner.IsServer)
+                {
+                    startGame.gameObject.SetActive(true);
+                }
             }
         }
 
         private void OnStart()
         {
             networkRunner.LoadScene(sceneRef);
-        }
-        private void OnBackButton()
-        {
-            gameObject.SetActive(false);
-            lobby.SetActive(true);
         }
     }
 }

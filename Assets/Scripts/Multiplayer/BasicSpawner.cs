@@ -2,38 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core;
 using Fusion;
 using Fusion.Addons.Physics;
 using Fusion.Sockets;
 using Mods;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Multiplayer
 {
     public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
-        [SerializeField] private NetworkPrefabRef _playerPrefab;
-        public event Action OnSceneLoaded;
-        [Networked]private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters { get; set; }
-        private NetworkRunner _runner;
-        private RunnerSimulatePhysics3D _simulate3DRunner;
+        [FormerlySerializedAs("_playerPrefab")] [SerializeField] private NetworkPrefabRef playerPrefab;
+        [Networked]private Dictionary<PlayerRef, NetworkObject> SpawnedCharacters { get; set; }
+        private NetworkRunner runner;
+        private RunnerSimulatePhysics3D simulate3DRunner;
         public event Action<byte[]> OnDataReceived;
         public event Action OnPlayerJoinedEvent;
         public event Action OnRoundStarted;
+        public event Action OnSceneLoaded;
         public static BasicSpawner Instance { get; private set; }
     
-        public async void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
-            OnPlayerJoinedEvent();
+            OnPlayerJoinedEvent?.Invoke();   
         }
 
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
-            if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
+            if (SpawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
             {
                 runner.Despawn(networkObject);
-                _spawnedCharacters.Remove(player);
+                SpawnedCharacters.Remove(player);
             }
         }
         public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -45,9 +47,13 @@ namespace Multiplayer
             input.Set(data);
         }
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            SceneManager.LoadScene(0);
+        }
         public void OnConnectedToServer(NetworkRunner runner) { }
-        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) {}
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
@@ -63,11 +69,19 @@ namespace Multiplayer
                 foreach (var player in runner.ActivePlayers)
                 {
                     Vector3 spawnPosition = Spawner.Instance.SpawnPoints[player.PlayerId-1].transform.position;
-                    NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Spawner.Instance.SpawnPoints[player.PlayerId-1].transform.rotation, player);
-                    _spawnedCharacters.Add(player, networkPlayerObject);   
+                    NetworkObject networkPlayerObject = runner.Spawn(playerPrefab, spawnPosition, Spawner.Instance.SpawnPoints[player.PlayerId-1].transform.rotation, player);
+                    SpawnedCharacters.Add(player, networkPlayerObject);   
                 }
             }
-
+            if (runner.GameMode == GameMode.Single)
+            {
+                foreach (var character in SpawnedCharacters)
+                {
+                    character.Value.GetComponent<Car>().SpawnSavedCar();
+                }
+                OnRoundStarted?.Invoke();
+                return;
+            }
             if (runner.ActivePlayers.Count() == 2)
             {
                 await Task.Delay(1000);
@@ -91,21 +105,25 @@ namespace Multiplayer
 
         private void Start()
         {
-            _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
+            SpawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
             Instance = this;
         }
 
         public async void StartGame (GameMode mode, StartGameArgs startGameArgs)
         {
-            _runner = gameObject.AddComponent<NetworkRunner>();
-            _runner.ProvideInput = true;
-            _runner.AddCallbacks(this);
+            runner = gameObject.AddComponent<NetworkRunner>();
+            runner.ProvideInput = true;
+            runner.AddCallbacks(this);
             var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
             var sceneInfo = new NetworkSceneInfo();
             if (scene.IsValid) {
                 sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
             }
-            await _runner.StartGame(startGameArgs);
+            await runner.StartGame(startGameArgs);
+            if (mode == GameMode.Single)
+            {
+                runner.LoadScene(SceneRef.FromIndex(1));
+            }
         }
     }
 }

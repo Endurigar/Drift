@@ -1,16 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Mods;
 using UnityEngine;
 
-public class CarSpawner : MonoBehaviour
+namespace Core
 {
-   [SerializeField] private Car car;
-
-   private void Awake()
+   public class CarSpawner : MonoBehaviour
    {
-      car?.ChangeCar(PlayerPrefs.GetInt("CurrentCarIndex"));
+      [SerializeField] private Car car;
+
+      private void Awake()
+      {
+         car?.ChangeCar(PlayerPrefs.GetInt("CurrentCarIndex"));
+      }
    }
-   
 }

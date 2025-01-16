@@ -8,7 +8,7 @@ namespace Garage
     {
         [SerializeField] private GameObject[] wheels;
         [SerializeField] private Car car;
-        [SerializeField] private CarModsSO carModsSo;
+        [SerializeField] private CarModsSo carModsSo;
         [SerializeField] private ChangeWheelsButtonsSpawner changeWheelsButtonsSpawner;
         [SerializeField] private GameObject wheelsList;
         [SerializeField] private CarSwapper carSwapper;
@@ -17,7 +17,6 @@ namespace Garage
 
         private void Awake()
         {
-            carSwapper.OnCarSwapped += OnCarSwapped;
             changeWheelsButtonsSpawner.OnWheelSelected += ChangeWheel;
         }
 
@@ -36,10 +35,6 @@ namespace Garage
                 Destroy(currentWheel);
                 car.CurrentCarInstance.Wheels[i].WheelMesh = newWheel.transform;
             }
-        }
-
-        private void OnCarSwapped()
-        {
         }
     }
 }

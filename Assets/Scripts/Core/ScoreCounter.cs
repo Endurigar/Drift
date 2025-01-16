@@ -1,14 +1,13 @@
-﻿using System;
-using Core;
+﻿using System.Collections;
 using Fusion;
 using Multiplayer;
 using Ui;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace Core
 {
     [RequireComponent(typeof(CarController))]
-    public class ScoreCounter: NetworkBehaviour
+    public class ScoreCounter : NetworkBehaviour
     {
         private CarController carController;
         [SerializeField] private float coefficient;
@@ -20,15 +19,16 @@ namespace DefaultNamespace
         private float totalScore;
         private float currentScore;
         public float TotalScore => totalScore;
-      
+
         private bool isActive;
+        private Coroutine driftCoroutine;
+
         private void Start()
         {
             carController = GetComponent<CarController>();
-                
 
-                carController.OnDrifting += DriftStart;
-                UiRoundTimer.Instance.OnRoundEnded += End;
+            carController.OnDrifting += DriftStart;
+            UiRoundTimer.Instance.OnRoundEnded += End;
             BasicSpawner.Instance.OnRoundStarted += () => isActive = true;
 
             RestartHandler.OnRestart += () =>
@@ -36,38 +36,37 @@ namespace DefaultNamespace
                 RestartScore();
                 isActive = true;
             };
-
         }
 
-         private void FixedUpdate()
+        private void DriftStart()
+        {
+            if (!isDrifting)
             {
-                if (isDrifting)
+                isDrifting = true;
+                driftStartTime = Time.time;
+                lastDriftUpdateTime = Time.time;
+                ScoreHandler.Instance.OnDriftStart?.Invoke();
+
+                if (driftCoroutine != null)
                 {
-                    UpdateDrift();
+                    StopCoroutine(driftCoroutine);
                 }
+
+                driftCoroutine = StartCoroutine(HandleDrift());
             }
-        
-            private void DriftStart()
+            else
             {
-                if (!isDrifting)
-                {
-                    ScoreHandler.Instance.OnDriftStart?.Invoke();
-                    isDrifting = true;
-                    driftStartTime = Time.time;
-                    lastDriftUpdateTime = Time.time;
-                }
-                else
-                {
-                    lastDriftUpdateTime = Time.time;
-                }
+                lastDriftUpdateTime = Time.time;
             }
-            
-        
-            private void UpdateDrift()
+        }
+
+        private IEnumerator HandleDrift()
+        {
+            while (isDrifting)
             {
                 float currentTime = Time.time;
                 float driftDuration = currentTime - driftStartTime;
-        
+
                 if (currentTime - lastDriftUpdateTime >= driftDelay)
                 {
                     EndDrift(driftDuration);
@@ -75,39 +74,39 @@ namespace DefaultNamespace
                 else
                 {
                     currentScore = coefficient * driftDuration;
-                    ScoreHandler.Instance.OnDriftUpdate?.Invoke(driftDuration,currentScore);
+                    ScoreHandler.Instance.OnDriftUpdate?.Invoke(driftDuration, currentScore);
                 }
-            }
-        
-            private void EndDrift(float driftDuration)
-            {
-                isDrifting = false;
-                float finalScore = coefficient * driftDuration;
-                totalScore = TotalScore + finalScore;
-                ScoreHandler.Instance.OnDriftEnd?.Invoke(TotalScore);
-             
-            }
 
-            private void End()
-            {
-                if(!isActive) return;
-                isActive = false;
-                //Debug.LogError("END_DRIFT");
+                yield return null;
+            }
+        }
 
-                RPC_EndDrift(totalScore, Object.InputAuthority.PlayerId);
-            }
-            private void RestartScore()
+        private void EndDrift(float driftDuration)
+        {
+            isDrifting = false;
+
+            float finalScore = coefficient * driftDuration;
+            totalScore += finalScore;
+
+            ScoreHandler.Instance.OnDriftEnd?.Invoke(totalScore);
+
+            if (driftCoroutine != null)
             {
-                totalScore = 0;
-                currentScore = 0;
+                StopCoroutine(driftCoroutine);
+                driftCoroutine = null;
             }
-            [Rpc(RpcSources.All, RpcTargets.All)]
-            public void RPC_EndDrift(float totalScore, int id)
-            {
-                ScoreHandler.Instance.EndDrift(totalScore, id);
-               
-               // Debug.LogError("RPc_END_DRIFT");
-             
-            }
+        }
+
+        private void End()
+        {
+            isActive = false;
+            ScoreHandler.Instance.EndDrift(totalScore);
+        }
+
+        private void RestartScore()
+        {
+            totalScore = 0;
+            currentScore = 0;
+        }
     }
 }

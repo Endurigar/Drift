@@ -7,12 +7,10 @@ namespace Garage
 {
     public class CarSwapper : MonoBehaviour
     {
-        [SerializeField] private CarModsSO carModsSO;
+        [SerializeField] private CarModsSo carModsSO;
         [SerializeField] private Car car;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button previousButton;
-        [SerializeField] private Transform spawnPoint;
-        [SerializeField] private CarList carList;
 
         private int currentIndex = 0;
         private bool isForward = true;

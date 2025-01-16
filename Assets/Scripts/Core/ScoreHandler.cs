@@ -1,47 +1,29 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Core;
 using Fusion;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.SocialPlatforms.Impl;
 
-public class ScoreHandler : NetworkBehaviour
+namespace Core
 {
-    private static ScoreHandler _instance;
-    public event Action<NetworkDictionary<int, float>> OnRoundEnd;
-    public static ScoreHandler Instance => _instance;
-    [Networked] private NetworkDictionary<int, float> scores { get; } = new NetworkDictionary<int, float>();
-    public  Action OnDriftStart;
-    public  Action<float> OnDriftEnd;
-    public  Action<float,float> OnDriftUpdate;
-
-    private void Awake()
+    public class ScoreHandler : NetworkBehaviour
     {
-        _instance = this;
-        RestartHandler.OnRestart += () => scores.Clear();
-    }
+        private static ScoreHandler instance;
+        public static ScoreHandler Instance => instance;
+        public Action OnDriftStart;
+        public Action<float> OnDriftEnd;
+        public Action<float, float> OnDriftUpdate;
+        public Action<float> OnTotalScoreUpdated;
+        public float TotalScore { get; private set; }
 
-    public override void Spawned()
-    {
-        base.Spawned();
-       
-    }
-
-    public void EndDrift(float totalScore, int id)
-    {
-        if (Runner.IsServer)
+        private void Awake()
         {
-            scores.Add(id, totalScore);
+            instance = this;
         }
 
-        if (scores.Count == Runner.ActivePlayers.Count()) RPC_CheckScores();
-    }
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    private void RPC_CheckScores()
-    {
-        OnRoundEnd?.Invoke(scores);
+        public void EndDrift(float totalScore)
+        {
+            Debug.Log("yab");
+            OnTotalScoreUpdated?.Invoke(totalScore);
+            TotalScore = totalScore;
+        }
     }
 }

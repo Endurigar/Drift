@@ -1,9 +1,8 @@
-﻿using System;
-using Core;
-using Fusion;
+﻿using Fusion;
 using UnityEngine;
 
-
+namespace Core
+{
     public class Spawner: NetworkBehaviour
     {
         [SerializeField] private Transform[] spawnPoints;
@@ -20,7 +19,6 @@ using UnityEngine;
         private void Awake()
         {
             Instance = this;
-            
         }
 
         public override void Spawned()
@@ -29,7 +27,7 @@ using UnityEngine;
             RestartHandler.OnRestart += RestartPositions;
         }
 
-        public void RestartPositions()
+        private void RestartPositions()
         {
             if (Runner.IsServer)
             {
@@ -39,7 +37,6 @@ using UnityEngine;
 
                     if (networkObject != null)
                     {
-                    
                         int index = player.PlayerId % spawnPoints.Length;
                         networkObject.transform.position = spawnPoints[index].transform.position;
                         networkObject.transform.rotation = spawnPoints[index].transform.rotation;
@@ -50,3 +47,4 @@ using UnityEngine;
         }
        
     }
+}

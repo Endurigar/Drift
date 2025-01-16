@@ -12,7 +12,7 @@ namespace Garage
         [SerializeField] private Button setDecal;
         [SerializeField] private Button deleteDecal;
         [SerializeField] private ChangeWheelsButtonsSpawner changeWheelsButtonsSpawner;
-        [SerializeField] private CarModsSO carModsSo;
+        [SerializeField] private CarModsSo carModsSo;
         [SerializeField] private CarSwapper carSwapper;
         [SerializeField] private GameObject stickersPage;
         public LayerMask carLayerMask;
@@ -31,6 +31,11 @@ namespace Garage
 
         void Update()
         {
+            OnInput();
+        }
+
+        private void OnInput()
+        {
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0))
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -47,7 +52,6 @@ namespace Garage
                 MoveDecal();
             }
         }
-
         private void OnCarSwapped()
         {
             isLoading = true;
